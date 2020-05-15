@@ -15,8 +15,13 @@ Example:
 
      func main() {
     	gemini.HandleFunc("/example", func(w *gemini.Response, r *gemini.Request) {
-    		w.SetStatus(gemini.StatusSuccess, "text/gemini")
-    		w.Write([]byte("HELLO: " + r.URL.Path + "\n"))
+    		if len(r.URL.RawQuery) == 0 {
+    			w.SetStatus(gemini.StatusInput, "what is the answer to the ultimate question")
+    		} else {
+    			w.SetStatus(gemini.StatusSuccess, "text/gemini")
+    			answer := r.URL.RawQuery
+    			w.Write([]byte("HELLO: " + r.URL.Path + ", yes the answer is: " + answer))
+    		}
     	})
 
     	gemini.Handle("/", gemini.FileServer(*root))
@@ -56,6 +61,7 @@ FUNCTIONS
 func Handle(p string, h Handler)
 func HandleFunc(p string, f HandlerFunc)
 func ListenAndServeTLS(addr string, certFile, keyFile string) error
+func ServeFilePath(p string, w *Response, r *Request)
 
 TYPES
 
