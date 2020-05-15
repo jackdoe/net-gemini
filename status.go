@@ -7,8 +7,8 @@ const (
 	StatusSuccess             = 20
 	StautsRedirect            = 30
 	StatusTemporaryFailure    = 40
-	StatusNotFound            = 41
-	StatusForbidden           = 42
 	StatusPermanentFailure    = 50
+	StatusNotFound            = 51
+	StatusForbidden           = 52
 	StatusCertificateRequired = 60
 )
