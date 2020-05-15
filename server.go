@@ -90,13 +90,13 @@ func (s *Server) handleGeminiRequest(conn net.Conn) {
 		_ = out.SetStatus(StatusPermanentFailure, "Request too long!")
 		return
 	} else if err != nil {
-		_ = out.SetStatus(StatusTemporaryFailure, "Unknown error reading request!")
+		_ = out.SetStatus(StatusTemporaryFailure, "Unknown error reading request! "+err.Error())
 		return
 	}
 
 	URL, err := url.Parse(string(request))
 	if err != nil {
-		_ = out.SetStatus(StatusPermanentFailure, "Error parsing URL!")
+		_ = out.SetStatus(StatusPermanentFailure, "Error parsing URL! "+err.Error())
 		return
 	}
 	if URL.Scheme == "" {

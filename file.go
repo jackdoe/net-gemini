@@ -21,13 +21,7 @@ func FileServer(root string) Handler {
 	return &fileHandler{root: filepath.Clean(root)}
 }
 
-func (fh *fileHandler) ServeGemini(w *Response, r *Request) {
-	p := filepath.Clean(path.Join(fh.root, r.URL.Path))
-	if !strings.HasPrefix(p, fh.root) {
-		w.SetStatus(StatusTemporaryFailure, "Path not in scope!")
-		return
-	}
-
+func ServeFilePath(p string, w *Response, r *Request) {
 	s, err := os.Stat(p)
 	if err != nil {
 		w.SetStatus(StatusNotFound, p+" File Not Found!")
@@ -94,6 +88,15 @@ FILE:
 		// or io error, but status is already sent, everything is broken!
 		w.SetStatus(StatusTemporaryFailure, "IO error!")
 	}
+}
+func (fh *fileHandler) ServeGemini(w *Response, r *Request) {
+	p := filepath.Clean(path.Join(fh.root, r.URL.Path))
+	if !strings.HasPrefix(p, fh.root) {
+		w.SetStatus(StatusTemporaryFailure, "Path not in scope!")
+		return
+	}
+
+	ServeFilePath(p, w, r)
 }
 
 func allowed(fi os.FileInfo) bool {
