@@ -24,7 +24,7 @@ func FileServer(root string) Handler {
 func ServeFilePath(p string, w *Response, r *Request) {
 	s, err := os.Stat(p)
 	if err != nil {
-		w.SetStatus(StatusNotFound, p+" File Not Found!")
+		w.SetStatus(StatusNotFound, "File Not Found!")
 		return
 	}
 	if !allowed(s) {
