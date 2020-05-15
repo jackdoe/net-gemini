@@ -67,6 +67,9 @@ type basicHandler struct {
 
 func (b *basicHandler) ServeGemini(w *Response, r *Request) {
 	u := r.URL.Path
+	if u == "" {
+		u = "/"
+	}
 	for _, h := range b.handlers {
 		if strings.HasPrefix(u, h.p) {
 			h.handler.ServeGemini(w, r)
