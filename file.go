@@ -28,7 +28,7 @@ func ServeFilePath(p string, w *Response, r *Request) {
 		return
 	}
 	if !allowed(s) {
-		w.SetStatus(StatusForbidden, "Forbidden!")
+		w.SetStatus(StatusGone, "Forbidden!")
 		return
 	}
 	if s.IsDir() {
