@@ -13,6 +13,43 @@ import (
 	"time"
 )
 
+//--------------------------------------
+type byDirs []os.FileInfo
+
+func (s byDirs) Len() int {
+    return len(s)
+}
+
+func (s byDirs) Swap(i, j int) {
+    s[i], s[j] = s[j], s[i]
+}
+
+func (s byDirs) Less(i, j int) bool {
+	if s[i].IsDir() {
+		if s[j].IsDir() {
+			return s[i].Name() < s[j].Name()
+		}
+		return true
+	}
+	if s[j].IsDir() {
+		if s[i].IsDir() {
+			return s[i].Name() < s[j].Name()
+		}
+		return false
+	}
+	return s[i].Name() < s[j].Name()
+}
+//--------------------------------------
+
+func brief(s string) (r string) {
+	if len(s) < 58 {
+		return s
+	} else {
+		return s[0:58] + " ..."
+	}
+}
+
+
 type fileHandler struct {
 	root string
 }
@@ -47,8 +84,11 @@ func ServeFilePath(p string, w *Response, r *Request) {
 		w.SetStatus(StatusSuccess, "text/gemini")
 		w.Write([]byte(fmt.Sprintf("# Listing %s\n\n", p)))
 
-		sort.Slice(files, func(i, j int) bool { return files[i].Name() < files[j].Name() })
+		sort.Sort(byDirs(files))
+		//sort.Slice(files, func(i, j int) bool { return files[i].Name() < files[j].Name() })
 
+		rpath := r.URL.String()
+		w.Write([]byte(fmt.Sprintf("=> %s ..\n", rpath[0:strings.LastIndex(rpath,"/")])))
 		for _, file := range files {
 			if strings.HasPrefix(file.Name(), ".") {
 				continue
@@ -58,7 +98,11 @@ func ServeFilePath(p string, w *Response, r *Request) {
 				continue
 			}
 
-			w.Write([]byte(fmt.Sprintf("=> %s %s [ %v ]\n", filepath.Clean(path.Join(r.URL.Path, file.Name())), file.Name(), file.ModTime().Format(time.ANSIC))))
+			if file.IsDir() {
+				w.Write([]byte(fmt.Sprintf("=> %s % 80s %*v\n", filepath.Clean(path.Join(r.URL.Path, file.Name())), brief("⍠: "+file.Name()), 82-len(brief("⍠: "+file.Name())), "["+file.ModTime().Format(time.Stamp)+"]")))
+			} else {
+				w.Write([]byte(fmt.Sprintf("=> %s % 80s %*v\n", filepath.Clean(path.Join(r.URL.Path, file.Name())), brief(file.Name()), 80-len(brief(file.Name())), "["+file.ModTime().Format(time.Stamp)+"]")))
+			}
 		}
 		return
 	}
